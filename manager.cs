@@ -55,6 +55,11 @@ namespace EventManager
      
         }
         public void MainMenu(string username) {
+            if(username.Equals("admin"))
+            {
+
+            }
+            //USERNAME !ADMIN
         }
     }
 }
