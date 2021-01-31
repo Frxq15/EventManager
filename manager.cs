@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace EventManager
@@ -56,7 +57,6 @@ namespace EventManager
             }
      
         }
-
         public bool MenuChooser(string username)
         {
             string[] admins = new string[3] { "admin", "administrator", "root" };
@@ -113,6 +113,7 @@ namespace EventManager
 
                 case "6":
                     Console.WriteLine("Option 6 Selected.");
+                    DisplayLog(username);
                     return true;
 
                 default:
@@ -142,6 +143,72 @@ namespace EventManager
                 default:
                     return true;
             }
+        }
+        public void AddEvent()
+        {
+            //add event
+        }
+        public void UpdateEvent()
+        {
+            //update event
+        }
+        public void DeleteEvent()
+        {
+            //delete event
+        }
+        public void BookTickets()
+        {
+            //book tickets
+        }
+        public void ListEvents()
+        {
+            //list events
+        }
+        public bool DisplayLog(string username)
+        {
+            string path = @"log.txt";
+
+            if(!File.Exists(path))
+            {
+                using (FileStream fs = File.Create(path))
+                {
+                    fs.Close();
+                }
+
+                Console.Write("The log file is currently empty.");
+                AdminMenu(username);
+                return true;
+            }
+            Console.Clear();
+            Console.WriteLine("Attempting to display log file:");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            int lines = 0;
+            foreach (string line in File.ReadLines(path))
+            {
+                lines++;
+                Console.WriteLine(line);
+            }
+
+
+            if(lines <= 0)
+            {
+                Console.WriteLine("\nThe log file is empty.");
+                string input = Console.ReadLine();
+
+                if (input != null)
+                    MenuChooser(username);
+                return true;
+            }
+
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\nDisplayed entire log file (" + lines + " lines)");
+            string input2 = Console.ReadLine();
+
+            if(input2 != null) 
+            MenuChooser(username);
+            return true;
         }
     }
 }
