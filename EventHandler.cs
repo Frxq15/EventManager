@@ -52,24 +52,9 @@ namespace EventManager
             }
             DateTimeInput = TempVar;
 
-            List<EventDetails> EventsList = new List<EventDetails>();
-            string jsonData = "";
+            List<EventDetails> EventsList = GetEvents();
+            int LastInsertID = EventsList[EventsList.Count].EventID;
 
-            //Read all text of file if file is not present create it first
-            if (File.Exists(filename))
-            {
-                jsonData = System.IO.File.ReadAllText(filename);
-            }
-            else
-            {
-                var createFile = File.Create(filename);
-                createFile.Close();
-            }
-
-            // De-serialize to object or create new list
-            EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
-                                  ?? new List<EventDetails>();
-            int LastInsertID = EventsList.Count;
             EventsList.Add(new EventDetails()
             {
                 EventID = LastInsertID + 1,
@@ -94,28 +79,12 @@ namespace EventManager
         }
         public bool UpdateEvent(string username)
         {
+            //TODO create function to load events from json or do it within main
+            //TODO add search by name
             Console.ForegroundColor = ConsoleColor.Red;
 
-            string filename = "events.json";
-
-            List<EventDetails> EventsList = new List<EventDetails>();
-            string jsonData = "";
-
-            //Read all text of file if file is not present create it first
-            if (File.Exists(filename))
-            {
-                jsonData = System.IO.File.ReadAllText(filename);
-            }
-            else
-            {
-                var createFile = File.Create(filename);
-                createFile.Close();
-            }
-
-            // De-serialize to object or create new list
-            EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
-                                  ?? new List<EventDetails>();
-            int LastInsertID = EventsList.Count;
+            List<EventDetails> EventsList = GetEvents();
+            int LastInsertID = EventsList[EventsList.Count].EventID;
 
             Console.WriteLine("Would you like to enter an Event ID or Event Name?");
             string type = Console.ReadLine();
@@ -212,6 +181,39 @@ namespace EventManager
 
             //update event
         }
+
+        public bool DeleteEvent(string username)
+        {
+            string filename = "events.json";
+            List<EventDetails> EventsList = GetEvents();
+            Console.WriteLine("Please enter the ID of event you would like to delete: ");
+            int EventID = int.Parse(Console.ReadLine());
+            EventDetails UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == EventID);
+            int UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID == EventID);
+            if (UpdateEvent == null)
+            {
+                Console.WriteLine("Event Does not exist!");
+                return true;
+            }
+            Console.WriteLine("\nCurrent Event Information:");
+            Console.WriteLine("Event ID: " + UpdateEvent.EventID);
+            Console.WriteLine("Event Name: " + UpdateEvent.EventName);
+            Console.WriteLine("Tickets available: " + UpdateEvent.AmountTickets);//+ availabletickets
+            Console.WriteLine("Price per ticket: " + UpdateEvent.PricePerTicket);//+ priceperticket
+            Console.WriteLine("Date and time" + UpdateEvent.DateTime);//+ datetime
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Are you sure you want to delete " + UpdateEvent.EventName);
+            if (Console.ReadLine() == "yes")
+            {
+                EventsList.RemoveAt(UpdateEventID);
+                string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
+                System.IO.File.WriteAllText(filename, json);
+                Console.WriteLine("Event " + UpdateEvent.EventName + " has been removed.");
+            }
+
+            return true;
+        }
+
         public bool DisplayLog(string username)
         {
             string path = @"log.txt";
@@ -267,6 +269,29 @@ namespace EventManager
             sw.Close();
         }
 
+        public List<EventDetails> GetEvents()
+        {
+            string filename = "events.json";
+
+            List<EventDetails> EventsList = new List<EventDetails>();
+            string jsonData = "";
+
+            //Read all text of file if file is not present create it first
+            if (File.Exists(filename))
+            {
+                jsonData = System.IO.File.ReadAllText(filename);
+            }
+            else
+            {
+                var createFile = File.Create(filename);
+                createFile.Close();
+            }
+
+            // De-serialize to object or create new list
+            EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
+                                  ?? new List<EventDetails>();
+            return EventsList;
+        }
 
         public void UpdateEventList(int ListID, EventDetails UpdateEvent)
         {
