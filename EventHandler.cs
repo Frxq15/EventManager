@@ -85,7 +85,7 @@ namespace EventManager
             //Put entire list back into file
             string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
             System.IO.File.WriteAllText(filename, json);
-            AddLog("["+localdate+"]("+username+")"+ "[EVENT ADDED] {EventID "+EventID+", EventName "+EventNameInput+", AmountTickets "+AmountTicketsInput+", PricePerTicket "+PricePerTicketInput+", DateTime "+DateTimeInput+"}");
+            AddLog("[" + localdate + "](" + username + ")" + "[EVENT ADDED] {EventID " + EventID + ", EventName " + EventNameInput + ", AmountTickets " + AmountTicketsInput + ", PricePerTicket " + PricePerTicketInput + ", DateTime " + DateTimeInput + "}");
 
             Console.WriteLine("Event created successfully..");
             System.Threading.Thread.Sleep(1000);
@@ -130,6 +130,7 @@ namespace EventManager
 
                     int IDInput = int.Parse(Console.ReadLine());
                     EventDetails UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == IDInput);
+                    int UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID == IDInput);
                     if (UpdateEvent == null)
                     {
                         Console.WriteLine("Event Does not exist!");
@@ -151,37 +152,34 @@ namespace EventManager
 
                     switch (etype.ToLower())
                     {
-                        case "id":
-                            Console.WriteLine("\nThe current Event ID is: " + UpdateEvent.EventID);
-                            Console.WriteLine("Please enter a new event ID for this event.");
-                            int newid = Convert.ToInt32(Console.ReadLine());
-
-                            //update ID in JSON file
-
-                            manager.MenuChooser(username);
+                        case "event name":
+                            Console.WriteLine("\nThe current Evene Name is: " + UpdateEvent.EventName);
+                            Console.WriteLine("Please enter a new event name.");
+                            UpdateEvent.EventName = Console.ReadLine();
+                            UpdateEventList(UpdateEventID, UpdateEvent);
                             return true;
-
                         case "tickets available":
-                            Console.WriteLine("\nThe current tickets available are: ");//+availabletickets
+                            Console.WriteLine("\nThe current number of tickets available are: " + UpdateEvent.AmountTickets);//+availabletickets
                             Console.WriteLine("Please enter a new amount of tickets available for this event.");
-                            int newtickets = Convert.ToInt32(Console.ReadLine());
+                            UpdateEvent.AmountTickets = Convert.ToInt32(Console.ReadLine());
 
                             //update tickets in JSON file
-
+                            UpdateEventList(UpdateEventID, UpdateEvent);
                             manager.MenuChooser(username);
                             return true;
 
                         case "price per ticket":
-                            Console.WriteLine("\nThe current price per ticket is: ");//+priceperticket
+                            Console.WriteLine("\nThe current price per ticket is: " + UpdateEvent.PricePerTicket);//+priceperticket
                             Console.WriteLine("Please enter a new price per ticket for this event.");
-                            int priceperticket = Convert.ToInt32(Console.ReadLine());
+                            UpdateEvent.PricePerTicket = Convert.ToInt32(Console.ReadLine());
 
                             //update pricepertickets in JSON file
-
+                            UpdateEventList(UpdateEventID, UpdateEvent);
                             manager.MenuChooser(username);
                             return true;
 
                         case "date and time":
+                            Console.WriteLine("The current DateTime of the event is: " + UpdateEvent.DateTime);
                             Regex DateReg = new Regex(@"([0-9]{1,2}[/][0-9]{1,2}[/][0-9]{4}[ ][0-2][0-9][:][0-9]{2})");
                             Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
                             string TempVar = Console.ReadLine();
@@ -191,7 +189,8 @@ namespace EventManager
                                 Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
                                 TempVar = Console.ReadLine();
                             }
-                            string DateTimeInput = TempVar;
+                            UpdateEvent.DateTime = TempVar;
+                            UpdateEventList(UpdateEventID, UpdateEvent);
                             return true;
 
                         default:
@@ -203,6 +202,7 @@ namespace EventManager
                 case "name":
                     Console.WriteLine("Please enter an event name: ");
                     string name = Console.ReadLine();
+
                     return true;
 
                 default:
@@ -266,6 +266,39 @@ namespace EventManager
             sw.WriteLine(str);
             sw.Close();
         }
+
+
+        public void UpdateEventList(int ListID, EventDetails UpdateEvent)
+        {
+            string filename = "events.json";
+
+            List<EventDetails> EventsList = new List<EventDetails>();
+            string jsonData = "";
+
+            //Read all text of file if file is not present create it first
+            if (File.Exists(filename))
+            {
+                jsonData = System.IO.File.ReadAllText(filename);
+            }
+            else
+            {
+                var createFile = File.Create(filename);
+                createFile.Close();
+            }
+
+            // De-serialize to object or create new list
+            EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
+                                  ?? new List<EventDetails>();
+            int LastInsertID = EventsList.Count;
+
+            EventsList[ListID] = UpdateEvent;
+
+            //Put entire list back into file
+            string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
+            System.IO.File.WriteAllText(filename, json);
+
+            Console.WriteLine("Event Updated successfully..");
+        }
         public EventDetails LoadEvent(int IDInput)
         {
             string filename = "events.json";
@@ -294,5 +327,7 @@ namespace EventManager
 
             return UpdateEvent;
         }
+
+
     }
 }
