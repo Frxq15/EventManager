@@ -15,6 +15,10 @@ namespace EventManager
         Manager manager = new Manager();
         public void AddEvent(string username)
         {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Create New Event\n");
+
             string EventNameInput;
             int AmountTicketsInput;
             float PricePerTicketInput;
@@ -52,8 +56,11 @@ namespace EventManager
             }
             DateTimeInput = TempVar;
 
-            List<EventDetails> EventsList = GetEvents();
-            int LastInsertID = EventsList[EventsList.Count].EventID;
+            List<EventDetails> EventsList = GetEvents(username);
+            int LastInsertID = 0;
+            if (EventsList.Count > 0)
+                LastInsertID = EventsList[EventsList.Count - 1].EventID;
+
 
             EventsList.Add(new EventDetails()
             {
@@ -65,142 +72,162 @@ namespace EventManager
             });
 
             int EventID = LastInsertID + 1;
-            DateTime localdate = DateTime.Now;
 
             //Put entire list back into file
             string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
             System.IO.File.WriteAllText(filename, json);
-            AddLog("[" + localdate + "](" + username + ")" + "[EVENT ADDED] {EventID " + EventID + ", EventName " + EventNameInput + ", AmountTickets " + AmountTicketsInput + ", PricePerTicket " + PricePerTicketInput + ", DateTime " + DateTimeInput + "}");
+            AddLog("[" + username + "]" + "Added EventID [" + EventID + "], EventName [" + EventNameInput + "], AmountTickets [" + AmountTicketsInput + "], PricePerTicket [" + PricePerTicketInput + "], DateTime [" + DateTimeInput + "]");
 
-            Console.WriteLine("Event created successfully..");
-            System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("Event created successfully. Press any key to continue.");
+            Console.ReadKey();
             manager.MenuChooser(username);
 
         }
-        public bool UpdateEvent(string username)
+        public void UpdateEventInfo(string username)
         {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Update Event Information\n");
             //TODO create function to load events from json or do it within main
             //TODO add search by name
-            Console.ForegroundColor = ConsoleColor.Red;
+            EventsHandler handler = new EventsHandler();
 
-            List<EventDetails> EventsList = GetEvents();
-            int LastInsertID = EventsList[EventsList.Count].EventID;
+            List<EventDetails> EventsList = GetEvents(username);
+            int LastInsertID = 0;
+            if (EventsList.Count > 0)
+                LastInsertID = EventsList[EventsList.Count - 1].EventID;
 
-            Console.WriteLine("Would you like to enter an Event ID or Event Name?");
-            string type = Console.ReadLine();
-
-            switch (type.ToLower())
+            Console.WriteLine("Please enter an event ID or Name:");
+            EventDetails UpdateEvent;
+            int UpdateEventID;
+            string EventName = Console.ReadLine();
+            int EventID;
+            if (int.TryParse(EventName, out EventID))
             {
-                case "id":
+                UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == EventID);
+                UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID.Equals(EventID));
 
-
-                    List<string> ids = new List<string>();
-                    Console.WriteLine("Please enter an event id: ");
-
-                    int IDInput = int.Parse(Console.ReadLine());
-                    EventDetails UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == IDInput);
-                    int UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID == IDInput);
-                    if (UpdateEvent == null)
-                    {
-                        Console.WriteLine("Event Does not exist!");
-                        return true;
-                    }
-
-
-                    //ID IS VALID
-                    Console.Clear();
-                    Console.WriteLine("\nCurrent Event Information:");
-                    Console.WriteLine("Event ID: " + UpdateEvent.EventID);
-                    Console.WriteLine("Event Name: " + UpdateEvent.EventName);
-                    Console.WriteLine("Tickets available: " + UpdateEvent.AmountTickets);//+ availabletickets
-                    Console.WriteLine("Price per ticket: " + UpdateEvent.PricePerTicket);//+ priceperticket
-                    Console.WriteLine("Date and time" + UpdateEvent.DateTime);//+ datetime
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\nWhich part of the event would you like to update?");
-                    string etype = Console.ReadLine();
-
-                    switch (etype.ToLower())
-                    {
-                        case "event name":
-                            Console.WriteLine("\nThe current Evene Name is: " + UpdateEvent.EventName);
-                            Console.WriteLine("Please enter a new event name.");
-                            UpdateEvent.EventName = Console.ReadLine();
-                            UpdateEventList(UpdateEventID, UpdateEvent);
-                            return true;
-                        case "tickets available":
-                            Console.WriteLine("\nThe current number of tickets available are: " + UpdateEvent.AmountTickets);//+availabletickets
-                            Console.WriteLine("Please enter a new amount of tickets available for this event.");
-                            UpdateEvent.AmountTickets = Convert.ToInt32(Console.ReadLine());
-
-                            //update tickets in JSON file
-                            UpdateEventList(UpdateEventID, UpdateEvent);
-                            manager.MenuChooser(username);
-                            return true;
-
-                        case "price per ticket":
-                            Console.WriteLine("\nThe current price per ticket is: " + UpdateEvent.PricePerTicket);//+priceperticket
-                            Console.WriteLine("Please enter a new price per ticket for this event.");
-                            UpdateEvent.PricePerTicket = Convert.ToInt32(Console.ReadLine());
-
-                            //update pricepertickets in JSON file
-                            UpdateEventList(UpdateEventID, UpdateEvent);
-                            manager.MenuChooser(username);
-                            return true;
-
-                        case "date and time":
-                            Console.WriteLine("The current DateTime of the event is: " + UpdateEvent.DateTime);
-                            Regex DateReg = new Regex(@"([0-9]{1,2}[/][0-9]{1,2}[/][0-9]{4}[ ][0-2][0-9][:][0-9]{2})");
-                            Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
-                            string TempVar = Console.ReadLine();
-                            while (DateReg.Matches(TempVar).Count == 0)
-                            {
-                                Console.WriteLine("Invalid input!");
-                                Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
-                                TempVar = Console.ReadLine();
-                            }
-                            UpdateEvent.DateTime = TempVar;
-                            UpdateEventList(UpdateEventID, UpdateEvent);
-                            return true;
-
-                        default:
-                            //gonna make a function to easily display info for an event, which saves looping loads.
-                            return true;
-
-                    }//end of inner switch statement (etype)
-
-                case "name":
-                    Console.WriteLine("Please enter an event name: ");
-                    string name = Console.ReadLine();
-
-                    return true;
-
-                default:
-                    Console.WriteLine("DEFAULT ACTION");
-                    return true;
+            }
+            else
+            {
+                UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventName.Equals(EventName));
+                UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventName.Equals(EventName));
+            }
+            if (UpdateEvent == null)
+            {
+                Console.WriteLine("The event specified does not exist.");
+                handler.UpdateEventInfo(username);
+                return;
             }
 
-            //update event
+
+            //ID IS VALID
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Current Event Information:");
+            Console.WriteLine("Event ID: " + UpdateEvent.EventID);
+            Console.WriteLine("Event Name: " + UpdateEvent.EventName);
+            Console.WriteLine("Tickets available: " + UpdateEvent.AmountTickets);
+            Console.WriteLine("Price per ticket: " + UpdateEvent.PricePerTicket);
+            Console.WriteLine("Date and time: " + UpdateEvent.DateTime);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nWhich part of the event would you like to update?");
+            string etype = Console.ReadLine();
+
+
+            if (etype.ToLower().Contains("name")) {
+                Console.WriteLine("\nThe current Event Name is: " + UpdateEvent.EventName);
+                Console.WriteLine("Please enter a new event name.");
+                UpdateEvent.EventName = Console.ReadLine();
+                UpdateEventList(UpdateEventID, UpdateEvent);
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
+                Console.WriteLine("The event name has been updated. Press any key to continue.");
+                Console.ReadKey();
+                handler.UpdateEventInfo(username);
+                return;
+            }
+            if (etype.ToLower().Contains("tickets available"))
+            {
+                Console.WriteLine("\nThe current number of tickets available are: " + UpdateEvent.AmountTickets);
+                Console.WriteLine("Please enter a new amount of tickets available for this event.");
+                UpdateEvent.AmountTickets = Convert.ToInt32(Console.ReadLine());
+
+                //update tickets in JSON file
+                UpdateEventList(UpdateEventID, UpdateEvent);
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
+                Console.WriteLine("Number of tickets has been updated. Press any key to continue.");
+                Console.ReadKey();
+                handler.UpdateEventInfo(username);
+            }
+
+            if (etype.ToLower().Contains("price per ticket") || etype.ToLower().Contains("price"))
+            {
+                Console.WriteLine("\nThe current price per ticket is: " + UpdateEvent.PricePerTicket);
+                Console.WriteLine("Please enter a new price per ticket for this event.");
+                UpdateEvent.PricePerTicket = Convert.ToInt32(Console.ReadLine());
+
+                //update pricepertickets in JSON file
+                UpdateEventList(UpdateEventID, UpdateEvent);
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
+                Console.WriteLine("Price per ticket has been updated. Press any key to continue.");
+                Console.ReadKey();
+                handler.UpdateEventInfo(username);
+            }
+
+            if (etype.ToLower().Contains("date") || etype.ToLower().Contains("time"))
+            {
+                Console.WriteLine("The current Date and Time of the event is: " + UpdateEvent.DateTime);
+                Regex DateReg = new Regex(@"([0-9]{1,2}[/][0-9]{1,2}[/][0-9]{4}[ ][0-2][0-9][:][0-9]{2})");
+                Console.WriteLine("Please enter the Date and Time of the event in the format DD/MM/YYYY HH:MM");
+                string TempVar = Console.ReadLine();
+                while (DateReg.Matches(TempVar).Count == 0)
+                {
+                    Console.WriteLine("Invalid input given.");
+                    Console.WriteLine("Please enter the Date and Time of this event in the format DD/MM/YYYY HH:MM");
+                    TempVar = Console.ReadLine();
+                }
+                UpdateEvent.DateTime = TempVar;
+                UpdateEventList(UpdateEventID, UpdateEvent);
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
+                Console.WriteLine("The number of tickets for this event has been updated. Press any key to continue.");
+                Console.ReadKey();
+                handler.UpdateEventInfo(username);
+            }
+            else {
+                    Console.WriteLine("Invalid type specified, retrying event update.");
+                System.Threading.Thread.Sleep(2000);
+                UpdateEventInfo(username);
+            }
         }
 
         public bool DeleteEvent(string username)
         {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Delete Event\n");
+            EventsHandler handler = new EventsHandler();
+
             string filename = "events.json";
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
+
             Console.WriteLine("Please enter the ID of event you would like to delete: ");
             int EventID = int.Parse(Console.ReadLine());
             EventDetails UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == EventID);
             int UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID == EventID);
             if (UpdateEvent == null)
             {
-                Console.WriteLine("Event Does not exist!");
+                Console.WriteLine("The event specified does not exist, Press any key to continue.");
+                Console.ReadKey();
+                handler.DeleteEvent(username);
                 return true;
             }
-            Console.WriteLine("\nCurrent Event Information:");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Current Event Information:");
             Console.WriteLine("Event ID: " + UpdateEvent.EventID);
             Console.WriteLine("Event Name: " + UpdateEvent.EventName);
             Console.WriteLine("Tickets available: " + UpdateEvent.AmountTickets);//+ availabletickets
             Console.WriteLine("Price per ticket: " + UpdateEvent.PricePerTicket);//+ priceperticket
-            Console.WriteLine("Date and time" + UpdateEvent.DateTime);//+ datetime
+            Console.WriteLine("Date and time: " + UpdateEvent.DateTime);//+ datetime
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Are you sure you want to delete " + UpdateEvent.EventName);
             if (Console.ReadLine() == "yes")
@@ -208,15 +235,99 @@ namespace EventManager
                 EventsList.RemoveAt(UpdateEventID);
                 string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
                 System.IO.File.WriteAllText(filename, json);
-                Console.WriteLine("Event " + UpdateEvent.EventName + " has been removed.");
+                Console.WriteLine("Event " + UpdateEvent.EventName + " has been removed. Press any key to continue.");
+                AddLog("[" + username + "] deleted event [" + UpdateEvent.EventName + "]");
+                Console.ReadKey();
+                manager.MenuChooser(username);
             }
 
+            return true;
+        }
+
+        public bool BookTickets(string username)
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Book Tickets\n");
+            EventsHandler handler = new EventsHandler();
+
+            List<EventDetails> EventsList = GetEvents(username);
+            int LastInsertID = EventsList[EventsList.Count - 1].EventID;
+            Console.WriteLine("Please enter an event ID or Name:");
+            EventDetails UpdateEvent;
+            int UpdateEventID;
+            string EventName = Console.ReadLine();
+            int EventID;
+            if (int.TryParse(EventName, out EventID))
+            {
+                UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == EventID);
+                UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventID.Equals(EventID));
+
+            }
+            else
+            {
+                UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventName.Equals(EventName));
+                UpdateEventID = EventsList.FindIndex(EventDetails => EventDetails.EventName.Equals(EventName));
+            }
+            if (UpdateEvent == null)
+            {
+                Console.WriteLine("The event specified does not exist, Press any key to continue.");
+                Console.ReadKey();
+                handler.BookTickets(username);
+                return true;
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("\nCurrent Event Information:");
+            Console.WriteLine("Event ID: " + UpdateEvent.EventID);
+            Console.WriteLine("Event Name: " + UpdateEvent.EventName);
+            Console.WriteLine("Tickets available: " + UpdateEvent.AmountTickets);
+            Console.WriteLine("Price per ticket: " + UpdateEvent.PricePerTicket);
+            Console.WriteLine("Date and time: " + UpdateEvent.DateTime);
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (UpdateEvent.AmountTickets > 0)
+            {
+                Console.WriteLine("Please enter your name:");
+                string CustomerName = Console.ReadLine();
+                Console.WriteLine("Please enter your address:");
+                string CustomerAddress = Console.ReadLine();
+                Console.WriteLine("Please enter number of tickets:");
+                int NumberTickets = int.Parse(Console.ReadLine());
+                while (UpdateEvent.AmountTickets - NumberTickets < 0 || NumberTickets < 1)
+                {
+                    Console.WriteLine("Invalid Number of tickets!");
+                    Console.WriteLine("Please enter number of tickets:");
+                    NumberTickets = int.Parse(Console.ReadLine());
+                }
+
+                Console.WriteLine("Total cost: £" + UpdateEvent.PricePerTicket * NumberTickets);
+
+                BookingDetails booking = new BookingDetails();
+                booking.CustomerName = CustomerName;
+                booking.CustomerAddress = CustomerAddress;
+                booking.NumberTickets = NumberTickets;
+
+                UpdateEvent.AmountTickets -= NumberTickets;
+                UpdateEvent.BookingDetails.Add(booking);
+
+                UpdateEventList(UpdateEventID, UpdateEvent);
+                AddLog("[" + CustomerName + "] booked [" + NumberTickets + "] tickets for [£" + UpdateEvent.PricePerTicket * NumberTickets + "]");
+                manager.MenuChooser(username);
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("There are no tickets available for this event, Press any key to continue.");
+                Console.ReadKey();
+                handler.BookTickets(username);
+            }
             return true;
         }
 
         public bool DisplayLog(string username)
         {
             string path = @"log.txt";
+
+            Console.ForegroundColor = ConsoleColor.Red;
 
             if (!File.Exists(path))
             {
@@ -243,6 +354,7 @@ namespace EventManager
 
             if (lines <= 0)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nThe log file is empty.");
                 string input = Console.ReadLine();
 
@@ -252,10 +364,11 @@ namespace EventManager
             }
 
 
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\nDisplayed entire log file (" + lines + " lines)");
-            Console.WriteLine("Enter a key and press enter to continue.");
-            string input2 = Console.ReadLine();
+            Console.WriteLine("Enter a key to continue");
+            Console.ReadKey();
+            ConsoleKeyInfo input2 = Console.ReadKey();
 
             if (input2 != null)
                 manager.MenuChooser(username);
@@ -265,11 +378,11 @@ namespace EventManager
         {
             string filepath = @"log.txt";
             StreamWriter sw = File.AppendText(filepath);
-            sw.WriteLine(str);
+            sw.WriteLine("[" + DateTime.Now + "] " + str);
             sw.Close();
         }
 
-        public List<EventDetails> GetEvents()
+        public List<EventDetails> GetEvents(string username)
         {
             string filename = "events.json";
 
@@ -314,45 +427,68 @@ namespace EventManager
             // De-serialize to object or create new list
             EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
                                   ?? new List<EventDetails>();
-            int LastInsertID = EventsList.Count;
 
             EventsList[ListID] = UpdateEvent;
 
             //Put entire list back into file
             string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
             System.IO.File.WriteAllText(filename, json);
+            Console.ForegroundColor = ConsoleColor.Red;
 
-            Console.WriteLine("Event Updated successfully..");
+            Console.WriteLine("The event was updated successfully. Press any key to continue.");
+            Console.ReadKey();
         }
-        public EventDetails LoadEvent(int IDInput)
+        public void PrintEvents(string username)
         {
-            string filename = "events.json";
-
-            List<EventDetails> EventsList = new List<EventDetails>();
-            string jsonData = "";
-
-            //Read all text of file if file is not present create it first
-            if (File.Exists(filename))
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Viewing All Events..\n");
+            List<EventDetails> EventsList = GetEvents(username);
+            Console.ForegroundColor = ConsoleColor.White;
+            foreach (EventDetails Event in EventsList)
             {
-                jsonData = System.IO.File.ReadAllText(filename);
+                Console.WriteLine("\nEvent ID: " + Event.EventID);
+                Console.WriteLine("Event Name: " + Event.EventName);
+                Console.WriteLine("Tickets available: " + Event.AmountTickets);//+ availabletickets
+                Console.WriteLine("Price per ticket: " + Event.PricePerTicket);//+ priceperticket
+                Console.WriteLine("Date and time: " + Event.DateTime + "\n");//+ datetime
+                Console.WriteLine("Booking Details: ");
+                foreach (BookingDetails Booking in Event.BookingDetails)
+                {
+                    Console.WriteLine("  Name: " + Booking.CustomerName);
+                    Console.WriteLine("  Address: " + Booking.CustomerAddress);
+                    Console.WriteLine("  Number of tickets: " + Booking.NumberTickets);
+                }
             }
-            else
-            {
-                var createFile = File.Create(filename);
-                createFile.Close();
-            }
-
-            // De-serialize to object or create new list
-            EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
-                                  ?? new List<EventDetails>();
-            int LastInsertID = EventsList.Count;
-
-            EventDetails UpdateEvent = EventsList.Find(EventDetails => EventDetails.EventID == IDInput);
-
-
-            return UpdateEvent;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nPress any key to continue.");
+            Console.ReadKey();
+            manager.MenuChooser(username);
         }
+        public void ViewOwnTickets(string username)
+        {
+            List<EventDetails> EventsList = GetEvents(username);
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Attempting to display purchased tickets for user: " + username);
+            foreach (EventDetails Event in EventsList)
+            {
+                foreach (BookingDetails Booking in Event.BookingDetails)
+                {
+                    if (Booking.CustomerName.Equals(username))
+                    {
+                        Console.WriteLine("\nEvent ID: " + Event.EventID);
+                        Console.WriteLine("Event Name: " + Event.EventName);
+                        Console.WriteLine("Tickets available: " + Event.AmountTickets);
+                        Console.WriteLine("Price per ticket: " + Event.PricePerTicket);
+                        Console.WriteLine("Date and time: " + Event.DateTime + "\n");
+                        Console.WriteLine("  Name: " + Booking.CustomerName);
+                        Console.WriteLine("  Address: " + Booking.CustomerAddress);
+                        Console.WriteLine("  Number of tickets: " + Booking.NumberTickets);
+                    }
+                }//end of booking details foreach
+            }//end of eventdetails foreach
 
-
+        }
     }
 }
