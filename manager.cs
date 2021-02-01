@@ -97,7 +97,7 @@ namespace EventManager
             {
                 case "1":
                     Console.WriteLine("Option 1 Selected.");
-                    handler.AddEvent();
+                    handler.AddEvent(username);
                     return true;
 
                 case "2":
@@ -150,4 +150,5 @@ namespace EventManager
                     return true;
             }
         }
+    }
 }
