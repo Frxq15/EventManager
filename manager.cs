@@ -75,7 +75,7 @@ namespace EventManager
         public bool AdminMenu(string username)
         {
             EventsHandler handler = new EventsHandler();
-            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.ForegroundColor = ConsoleColor.Yellow;
 
             Console.Clear();
             Console.WriteLine("");
@@ -88,8 +88,9 @@ namespace EventManager
             Console.WriteLine("\t\t3: Delete an event");
             Console.WriteLine("\t\t4: Book tickets");
             Console.WriteLine("\t\t5: Display event list");
-            Console.WriteLine("\t\t5: View self purchased tickets");
+            Console.WriteLine("\t\t6: View self purchased tickets");
             Console.WriteLine("\t\t7: Display transaction log");
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\nType 'logout' to logout of your account\n");
 
             string option = Console.ReadLine();
@@ -148,7 +149,7 @@ namespace EventManager
         public bool UserMenu(string username)
         {
             EventsHandler handler = new EventsHandler();
-            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.ForegroundColor = ConsoleColor.Yellow;
 
             Console.Clear();
             Console.WriteLine("");
@@ -159,6 +160,7 @@ namespace EventManager
             Console.WriteLine("\t\t1: Book tickets");
             Console.WriteLine("\t\t2: View self purchased tickets");
             Console.WriteLine("\t\t3: Display event list");
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\nType 'logout' to logout of your account\n");
 
             string option = Console.ReadLine();
