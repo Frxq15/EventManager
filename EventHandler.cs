@@ -12,6 +12,7 @@ namespace EventManager
 {
     public class EventsHandler
     {
+        Manager manager = new Manager();
         public void AddEvent()
         {
             string EventNameInput;
@@ -52,8 +53,19 @@ namespace EventManager
             DateTimeInput = TempVar;
 
             List<EventDetails> EventsList = new List<EventDetails>();
+            string jsonData = "";
 
-            var jsonData = System.IO.File.ReadAllText(filename);
+            //Read all text of file if file is not present create it first
+            if (File.Exists(filename))
+            {
+                jsonData = System.IO.File.ReadAllText(filename);
+            }
+            else
+            {
+                var createFile = File.Create(filename);
+                createFile.Close();
+            }
+
             // De-serialize to object or create new list
             EventsList = JsonConvert.DeserializeObject<List<EventDetails>>(jsonData)
                                   ?? new List<EventDetails>();
@@ -67,13 +79,12 @@ namespace EventManager
                 DateTime = DateTimeInput
             });
 
-            string json = JsonConvert.SerializeObject(EventsList.ToArray());
-
-            //write string to file
+            //Put entire list back into file
+            string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
             System.IO.File.WriteAllText(filename, json);
 
         }
-        public bool UpdateEvent()
+        public bool UpdateEvent(string username)
         {
             Console.ForegroundColor = ConsoleColor.Red;
 
@@ -93,9 +104,8 @@ namespace EventManager
 
                     if (!ids.Contains(ID))
                     {
-                        Console.WriteLine("Invalid EventID entered, please try another ID or Name");
-                        //will probably change this to a while loop later so they dont have to reinput name or id
-                        UpdateEvent();
+                        Console.WriteLine("Invalid EventID entered, please try again.");
+                        UpdateEvent(username);
                         return true;
                     }
                     //ID IS VALID
@@ -105,21 +115,53 @@ namespace EventManager
                     Console.WriteLine("Tickets available: ");//+ availabletickets
                     Console.WriteLine("Price per ticket: ");//+ priceperticket
                     Console.WriteLine("Date and time");//+ datetime
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("\nWhich part of the event would you like to update?");
                     string etype = Console.ReadLine();
 
                     switch (etype.ToLower())
                     {
                         case "id":
+                            Console.WriteLine("\nThe current Event ID is: " + ID);
+                            Console.WriteLine("Please enter a new event ID for this event.");
+                            int newid = Convert.ToInt32(Console.ReadLine());
+
+                            //update ID in JSON file
+
+                            manager.MenuChooser(username);
                             return true;
 
                         case "tickets available":
+                            Console.WriteLine("\nThe current tickets available are: ");//+availabletickets
+                            Console.WriteLine("Please enter a new amount of tickets available for this event.");
+                            int newtickets = Convert.ToInt32(Console.ReadLine());
+
+                            //update tickets in JSON file
+
+                            manager.MenuChooser(username);
                             return true;
 
                         case "price per ticket":
+                            Console.WriteLine("\nThe current price per ticket is: ");//+priceperticket
+                            Console.WriteLine("Please enter a new price per ticket for this event.");
+                            int priceperticket = Convert.ToInt32(Console.ReadLine());
+
+                            //update pricepertickets in JSON file
+
+                            manager.MenuChooser(username);
                             return true;
 
                         case "date and time":
+                            Regex DateReg = new Regex(@"([0-9]{1,2}[/][0-9]{1,2}[/][0-9]{4}[ ][0-2][0-9][:][0-9]{2})");
+                            Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
+                            string TempVar = Console.ReadLine();
+                            while (DateReg.Matches(TempVar).Count == 0)
+                            {
+                                Console.WriteLine("Invalid input!");
+                                Console.WriteLine("Please enter the DateTime of the event in the format DD/MM/YYYY HH:MM");
+                                TempVar = Console.ReadLine();
+                            }
+                            string DateTimeInput = TempVar;
                             return true;
 
                         default:
@@ -134,7 +176,7 @@ namespace EventManager
                     return true;
 
                 default:
-                    UpdateEvent();
+                    UpdateEvent(username);
                     return true;
             }
 
@@ -152,8 +194,50 @@ namespace EventManager
         {
             //list events
         }
-        public bool DisplayEvent()
+        public bool DisplayLog(string username)
         {
+            string path = @"log.txt";
+
+            if (!File.Exists(path))
+            {
+                using (FileStream fs = File.Create(path))
+                {
+                    fs.Close();
+                }
+
+                Console.Write("The log file is currently empty.");
+                manager.AdminMenu(username);
+                return true;
+            }
+            Console.Clear();
+            Console.WriteLine("Attempting to display log file:");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            int lines = 0;
+            foreach (string line in File.ReadLines(path))
+            {
+                lines++;
+                Console.WriteLine(line);
+            }
+
+
+            if (lines <= 0)
+            {
+                Console.WriteLine("\nThe log file is empty.");
+                string input = Console.ReadLine();
+
+                if (input != null)
+                    manager.MenuChooser(username);
+                return true;
+            }
+
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\nDisplayed entire log file (" + lines + " lines)");
+            string input2 = Console.ReadLine();
+
+            if (input2 != null)
+                manager.MenuChooser(username);
             return true;
         }
     }
