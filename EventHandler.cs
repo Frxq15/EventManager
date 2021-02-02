@@ -563,8 +563,6 @@ namespace EventManager
             {
                 Console.WriteLine("\nEvent ID: " + UserEvent.EventID);
                 Console.WriteLine("Event Name: " + UserEvent.EventName);
-                Console.WriteLine("Tickets available: " + UserEvent.AmountTickets);
-                Console.WriteLine("Price per ticket: " + UserEvent.PricePerTicket);
                 Console.WriteLine("Date and time: " + UserEvent.DateTime + "\n");
                 Console.WriteLine("Booking Details: ");
                 foreach (BookingDetails Booking in UserEvent.BookingDetails)
