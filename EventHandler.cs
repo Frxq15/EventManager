@@ -511,9 +511,9 @@ namespace EventManager
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("\nEvent ID: " + Event.EventID);
                 Console.WriteLine("Event Name: " + Event.EventName);
-                Console.WriteLine("Tickets available: " + Event.AmountTickets);//+ availabletickets
-                Console.WriteLine("Price per ticket: " + Event.PricePerTicket);//+ priceperticket
-                Console.WriteLine("Date and time: " + Event.DateTime + "\n");//+ datetime
+                Console.WriteLine("Tickets available: " + Event.AmountTickets);
+                Console.WriteLine("Price per ticket: " + Event.PricePerTicket);
+                Console.WriteLine("Date and time: " + Event.DateTime + "\n");
             }
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\nPress any key to continue.");
