@@ -23,6 +23,8 @@ namespace EventManager
             switch (username.ToLower())
             {
                 case "demouser":
+                case "user":
+                case "guest":
                     Console.WriteLine("Please enter your password:");
                     string password = Console.ReadLine();
 
@@ -38,6 +40,8 @@ namespace EventManager
                     return true;
 
                 case "admin":
+                case "administrator":
+
                     Console.WriteLine("Please enter your password:");
                     string password2 = Console.ReadLine();
 
@@ -179,7 +183,7 @@ namespace EventManager
 
                 case "3":
                     Console.WriteLine("Option 3 Selected.");
-                    handler.PrintEvents(username);
+                    handler.PrintUserEvents(username);
                     return true;
 
                 case "logout":
