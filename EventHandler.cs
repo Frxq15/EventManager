@@ -471,12 +471,12 @@ namespace EventManager
             System.Threading.Thread.Sleep(1000);
             Console.Clear();
             List<EventDetails> EventsList = GetEvents(username);
-            Console.ForegroundColor = ConsoleColor.White;
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Running list all events.");
             foreach (EventDetails Event in EventsList)
             {
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine("\nEvent ID: " + Event.EventID);
                 Console.WriteLine("Event Name: " + Event.EventName);
                 Console.WriteLine("Tickets available: " + Event.AmountTickets);//+ availabletickets
@@ -526,6 +526,10 @@ namespace EventManager
                 if (count <= 0)
                 {
                     Console.WriteLine("You have no tickets purchased.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\nPress any key to continue.");
+                    Console.ReadKey();
+                    manager.MenuChooser(username);
                 }
             }
             Console.ForegroundColor = ConsoleColor.White;
