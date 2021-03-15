@@ -11,24 +11,12 @@ namespace EventManager
 {
     public class Manager
     {
-        public String username;
-
-        public void setUser(String user)
-        {
-            username = user;
-        }
-        public String getUser()
-        {
-            return username;
-        }
-
         public bool Login()
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Please enter your username:");
 
             string username = Console.ReadLine();
-            setUser(username);
 
             switch (username.ToLower())
             {
@@ -114,37 +102,37 @@ namespace EventManager
             {
                 case "1":
                     Console.WriteLine("Option 1 Selected.");
-                    handler.AddEvent();
+                    handler.AddEvent(username);
                     return true;
 
                 case "2":
                     Console.WriteLine("Option 2 Selected.");
-                    handler.UpdateEventInfo();
+                    handler.UpdateEventInfo(username);
                     return true;
 
                 case "3":
                     Console.WriteLine("Option 3 Selected.");
-                    handler.DeleteEvent();
+                    handler.DeleteEvent(username);
                     return true;
 
                 case "4":
                     Console.WriteLine("Option 4 Selected.");
-                    handler.BookTickets();
+                    handler.BookTickets(username);
                     return true;
 
                 case "5":
                     Console.WriteLine("Option 5 Selected.");
-                    handler.PrintEvents();
+                    handler.PrintEvents(username);
                     return true;
 
                 case "6":
                     Console.WriteLine("Option 6 Selected.");
-                    handler.ViewOwnTickets();
+                    handler.ViewOwnTickets(username);
                     return true;
 
                 case "7":
                     Console.WriteLine("Option 7 Selected.");
-                    handler.DisplayLog();
+                    handler.DisplayLog(username);
                     return true;
 
                 case "logout":
@@ -183,17 +171,17 @@ namespace EventManager
             {
                 case "1":
                     Console.WriteLine("Option 1 Selected.");
-                    handler.BookTickets();
+                    handler.BookTickets(username);
                     return true;
 
                 case "2":
                     Console.WriteLine("Option 2 Selected.");
-                    handler.ViewOwnTickets();
+                    handler.ViewOwnTickets(username);
                     return true;
 
                 case "3":
                     Console.WriteLine("Option 3 Selected.");
-                    handler.PrintUserEvents();
+                    handler.PrintUserEvents(username);
                     return true;
 
                 case "logout":
