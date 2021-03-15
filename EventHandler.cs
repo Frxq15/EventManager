@@ -7,14 +7,13 @@ using System.Text.Json.Serialization;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
 
 namespace EventManager
 {
     public class EventsHandler
     {
         Manager manager = new Manager();
-        public void AddEvent()
+        public void AddEvent(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -60,7 +59,7 @@ namespace EventManager
             }
             DateTimeInput = TempVar;
 
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
             int LastInsertID = 0;
             if (EventsList.Count > 0)
                 LastInsertID = EventsList[EventsList.Count - 1].EventID;
@@ -80,14 +79,14 @@ namespace EventManager
             //Put entire list back into file
             string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
             System.IO.File.WriteAllText(filename, json);
-            AddLog("[" + manager.getUser() + "]" + "Added EventID [" + EventID + "], EventName [" + EventNameInput + "], AmountTickets [" + AmountTicketsInput + "], PricePerTicket [" + PricePerTicketInput + "], DateTime [" + DateTimeInput + "]");
+            AddLog("[" + username + "]" + "Added EventID [" + EventID + "], EventName [" + EventNameInput + "], AmountTickets [" + AmountTicketsInput + "], PricePerTicket [" + PricePerTicketInput + "], DateTime [" + DateTimeInput + "]");
 
             Console.WriteLine("Event created successfully. Press any key to continue.");
             Console.ReadKey();
-            manager.MenuChooser(manager.getUser());
+            manager.MenuChooser(username);
 
         }
-        public void UpdateEventInfo()
+        public void UpdateEventInfo(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -100,7 +99,7 @@ namespace EventManager
             //TODO add search by name
             EventsHandler handler = new EventsHandler();
 
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
             int LastInsertID = 0;
             if (EventsList.Count > 0)
                 LastInsertID = EventsList[EventsList.Count - 1].EventID;
@@ -124,7 +123,7 @@ namespace EventManager
             if (UpdateEvent == null)
             {
                 Console.WriteLine("The event specified does not exist.");
-                handler.UpdateEventInfo();
+                handler.UpdateEventInfo(username);
                 return;
             }
 
@@ -148,10 +147,10 @@ namespace EventManager
                 Console.WriteLine("Please enter a new event name.");
                 UpdateEvent.EventName = Console.ReadLine();
                 UpdateEventList(UpdateEventID, UpdateEvent);
-                AddLog("[" + manager.getUser() + "] updated [" + UpdateEvent.EventName + "]");
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
                 Console.WriteLine("The event name has been updated. Press any key to continue.");
                 Console.ReadKey();
-                handler.UpdateEventInfo();
+                handler.UpdateEventInfo(username);
                 return;
             }
             if (etype.ToLower().Contains("tickets available") || etype.ToLower().Contains("tickets") || etype.ToLower().Contains("ticket") || etype.ToLower().Contains("amount"))
@@ -162,10 +161,10 @@ namespace EventManager
 
                 //update tickets in JSON file
                 UpdateEventList(UpdateEventID, UpdateEvent);
-                AddLog("[" + manager.getUser() + "] updated [" + UpdateEvent.EventName + "]");
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
                 Console.WriteLine("Number of tickets has been updated. Press any key to continue.");
                 Console.ReadKey();
-                handler.UpdateEventInfo();
+                handler.UpdateEventInfo(username);
             }
 
             if (etype.ToLower().Contains("price per ticket") || etype.ToLower().Contains("price") || etype.ToLower().Contains("cost"))
@@ -176,10 +175,10 @@ namespace EventManager
 
                 //update pricepertickets in JSON file
                 UpdateEventList(UpdateEventID, UpdateEvent);
-                AddLog("[" + manager.getUser() + "] updated [" + UpdateEvent.EventName + "]");
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
                 Console.WriteLine("Price per ticket has been updated. Press any key to continue.");
                 Console.ReadKey();
-                handler.UpdateEventInfo();
+                handler.UpdateEventInfo(username);
             }
 
             if (etype.ToLower().Contains("date") || etype.ToLower().Contains("time"))
@@ -196,19 +195,19 @@ namespace EventManager
                 }
                 UpdateEvent.DateTime = TempVar;
                 UpdateEventList(UpdateEventID, UpdateEvent);
-                AddLog("[" + manager.getUser() + "] updated [" + UpdateEvent.EventName + "]");
+                AddLog("[" + username + "] updated [" + UpdateEvent.EventName + "]");
                 Console.WriteLine("The number of tickets for this event has been updated. Press any key to continue.");
                 Console.ReadKey();
-                manager.MenuChooser(manager.getUser());
+                manager.MenuChooser(username);
             }
             else {
                     Console.WriteLine("Invalid type specified, retrying event update.");
                 System.Threading.Thread.Sleep(2000);
-                UpdateEventInfo();
+                UpdateEventInfo(username);
             }
         }
 
-        public bool DeleteEvent()
+        public bool DeleteEvent(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -221,7 +220,7 @@ namespace EventManager
             Console.WriteLine("Running event deletion process.");
 
             string filename = "events.json";
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
 
             Console.WriteLine("Please enter the ID of event you would like to delete: ");
             int EventID = int.Parse(Console.ReadLine());
@@ -231,7 +230,7 @@ namespace EventManager
             {
                 Console.WriteLine("The event specified does not exist, Press any key to continue.");
                 Console.ReadKey();
-                handler.DeleteEvent();
+                handler.DeleteEvent(username);
                 return true;
             }
             Console.ForegroundColor = ConsoleColor.White;
@@ -249,15 +248,15 @@ namespace EventManager
                 string json = JsonConvert.SerializeObject(EventsList.ToArray(), Formatting.Indented);
                 System.IO.File.WriteAllText(filename, json);
                 Console.WriteLine("Event " + UpdateEvent.EventName + " has been removed. Press any key to continue.");
-                AddLog("[" + manager.getUser() + "] deleted event [" + UpdateEvent.EventName + "]");
+                AddLog("[" + username + "] deleted event [" + UpdateEvent.EventName + "]");
                 Console.ReadKey();
-                manager.MenuChooser(manager.getUser());
+                manager.MenuChooser(username);
             }
 
             return true;
         }
 
-        public bool BookTickets()
+        public bool BookTickets(string username)
         {
 
             Console.Clear();
@@ -270,7 +269,7 @@ namespace EventManager
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Running ticket booking process.");
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
             int LastInsertID = EventsList[EventsList.Count - 1].EventID;
             Console.WriteLine("Please enter an event ID or Name:");
             EventDetails UpdateEvent;
@@ -293,7 +292,7 @@ namespace EventManager
             {
                 Console.WriteLine("The event specified does not exist, Press any key to continue.");
                 Console.ReadKey();
-                handler.BookTickets();
+                handler.BookTickets(username);
                 return true;
             }
             Console.ForegroundColor = ConsoleColor.White;
@@ -325,26 +324,26 @@ namespace EventManager
                 booking.CustomerName = CustomerName;
                 booking.CustomerAddress = CustomerAddress;
                 booking.NumberTickets = NumberTickets;
-                booking.PurchasedBy = manager.getUser();
+                booking.PurchasedBy = username;
 
                 UpdateEvent.AmountTickets -= NumberTickets;
                 UpdateEvent.BookingDetails.Add(booking);
 
                 UpdateEventList(UpdateEventID, UpdateEvent);
                 AddLog("[" + CustomerName + "] booked [" + NumberTickets + "] tickets for [£" + UpdateEvent.PricePerTicket * NumberTickets + "]");
-                manager.MenuChooser(manager.getUser());
+                manager.MenuChooser(username);
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("There are no tickets available for this event, Press any key to continue.");
                 Console.ReadKey();
-                handler.BookTickets();
+                handler.BookTickets(username);
             }
             return true;
         }
 
-        public bool DisplayLog()
+        public bool DisplayLog(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -364,7 +363,7 @@ namespace EventManager
                 }
 
                 Console.Write("The log file is currently empty.");
-                manager.AdminMenu(manager.getUser());
+                manager.AdminMenu(username);
                 return true;
             }
             Console.WriteLine("Attempting to display log file:");
@@ -385,7 +384,7 @@ namespace EventManager
                 string input = Console.ReadLine();
 
                 if (input != null)
-                    manager.MenuChooser(manager.getUser());
+                    manager.MenuChooser(username);
                 return true;
             }
 
@@ -397,7 +396,7 @@ namespace EventManager
             ConsoleKeyInfo input2 = Console.ReadKey();
 
             if (input2 != null)
-                manager.MenuChooser(manager.getUser());
+                manager.MenuChooser(username);
             return true;
         }
         public void AddLog(string str)
@@ -408,7 +407,7 @@ namespace EventManager
             sw.Close();
         }
 
-        public List<EventDetails> GetEvents()
+        public List<EventDetails> GetEvents(string username)
         {
             string filename = "events.json";
 
@@ -464,14 +463,14 @@ namespace EventManager
             Console.WriteLine("The event was updated successfully. Press any key to continue.");
             Console.ReadKey();
         }
-        public void PrintEvents()
+        public void PrintEvents(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Viewing all events loaded.");
             System.Threading.Thread.Sleep(1000);
             Console.Clear();
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Running list all events.");
@@ -494,16 +493,16 @@ namespace EventManager
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\nPress any key to continue.");
             Console.ReadKey();
-            manager.MenuChooser(manager.getUser());
+            manager.MenuChooser(username);
         }
-        public void PrintUserEvents()
+        public void PrintUserEvents(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Viewing all events loaded.");
             System.Threading.Thread.Sleep(1000);
             Console.Clear();
-            List<EventDetails> EventsList = GetEvents();
+            List<EventDetails> EventsList = GetEvents(username);
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Running list all events.");
@@ -519,10 +518,10 @@ namespace EventManager
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\nPress any key to continue.");
             Console.ReadKey();
-            manager.MenuChooser(manager.getUser());
+            manager.MenuChooser(username);
         }
 
-        public void ViewOwnTickets()
+        public void ViewOwnTickets(string username)
         {
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.Red;
@@ -532,8 +531,8 @@ namespace EventManager
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Running list self purchased tickets.");
-            string NameString = manager.getUser();
-            List<EventDetails> EventsList = GetEvents();
+            string NameString = username;
+            List<EventDetails> EventsList = GetEvents(username);
             List<EventDetails> UserEventsList = new List<EventDetails>();
             int count = 0;
             foreach (EventDetails Event in EventsList)
@@ -556,7 +555,7 @@ namespace EventManager
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("\nPress any key to continue.");
                     Console.ReadKey();
-                    manager.MenuChooser(manager.getUser());
+                    manager.MenuChooser(username);
                 }
             }
             Console.ForegroundColor = ConsoleColor.White;
@@ -579,7 +578,7 @@ namespace EventManager
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\nPress any key to continue.");
             Console.ReadKey();
-            manager.MenuChooser(manager.getUser());
+            manager.MenuChooser(username);
         }
     }
 }
