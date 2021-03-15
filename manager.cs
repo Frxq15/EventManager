@@ -11,7 +11,16 @@ namespace EventManager
 {
     public class Manager
     {
+        public String username;
 
+        public void setUser(String user)
+        {
+            username = user;
+        }
+        public String getUser()
+        {
+            return username;
+        }
 
         public bool Login()
         {
@@ -19,6 +28,7 @@ namespace EventManager
             Console.WriteLine("Please enter your username:");
 
             string username = Console.ReadLine();
+            setUser(username);
 
             switch (username.ToLower())
             {
@@ -41,7 +51,7 @@ namespace EventManager
 
                 case "admin":
                 case "administrator":
-
+                case "root":
                     Console.WriteLine("Please enter your password:");
                     string password2 = Console.ReadLine();
 
