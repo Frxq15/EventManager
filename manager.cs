@@ -114,37 +114,37 @@ namespace EventManager
             {
                 case "1":
                     Console.WriteLine("Option 1 Selected.");
-                    handler.AddEvent(username);
+                    handler.AddEvent();
                     return true;
 
                 case "2":
                     Console.WriteLine("Option 2 Selected.");
-                    handler.UpdateEventInfo(username);
+                    handler.UpdateEventInfo();
                     return true;
 
                 case "3":
                     Console.WriteLine("Option 3 Selected.");
-                    handler.DeleteEvent(username);
+                    handler.DeleteEvent();
                     return true;
 
                 case "4":
                     Console.WriteLine("Option 4 Selected.");
-                    handler.BookTickets(username);
+                    handler.BookTickets();
                     return true;
 
                 case "5":
                     Console.WriteLine("Option 5 Selected.");
-                    handler.PrintEvents(username);
+                    handler.PrintEvents();
                     return true;
 
                 case "6":
                     Console.WriteLine("Option 6 Selected.");
-                    handler.ViewOwnTickets(username);
+                    handler.ViewOwnTickets();
                     return true;
 
                 case "7":
                     Console.WriteLine("Option 7 Selected.");
-                    handler.DisplayLog(username);
+                    handler.DisplayLog();
                     return true;
 
                 case "logout":
@@ -183,17 +183,17 @@ namespace EventManager
             {
                 case "1":
                     Console.WriteLine("Option 1 Selected.");
-                    handler.BookTickets(username);
+                    handler.BookTickets();
                     return true;
 
                 case "2":
                     Console.WriteLine("Option 2 Selected.");
-                    handler.ViewOwnTickets(username);
+                    handler.ViewOwnTickets();
                     return true;
 
                 case "3":
                     Console.WriteLine("Option 3 Selected.");
-                    handler.PrintUserEvents(username);
+                    handler.PrintUserEvents();
                     return true;
 
                 case "logout":
